@@ -1322,11 +1322,6 @@ PrivilegeOperationReturnValue FileProtocol::execWithElevatedPrivilege(ActionType
         return PrivilegeOperationReturnValue::success();
     }
 
-    // temporarily disable privilege execution
-    if (true) {
-        return PrivilegeOperationReturnValue::failure(errcode);
-    }
-
     if (!(errcode == EACCES || errcode == EPERM)) {
         return PrivilegeOperationReturnValue::failure(errcode);
     }
