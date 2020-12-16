@@ -555,7 +555,10 @@ bool KRunPrivate::runExternalBrowser(const QString &_exec)
 
 void KRunPrivate::showPrompt()
 {
-    ExecutableFileOpenDialog *dialog = new ExecutableFileOpenDialog(promptMode(), q->window());
+    QMimeDatabase db;
+    const QMimeType mime = db.mimeTypeForUrl(m_strURL);
+
+    ExecutableFileOpenDialog *dialog = new ExecutableFileOpenDialog(promptMode(), mime, q->window());
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     QObject::connect(dialog, &ExecutableFileOpenDialog::finished, q, [this, dialog](int result){
                          onDialogFinished(result, dialog->isDontAskAgainChecked());

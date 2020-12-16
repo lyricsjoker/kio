@@ -9,16 +9,25 @@
 
 #include <QCheckBox>
 #include <QLabel>
+#include <QMimeType>
 #include <QPushButton>
 #include <QDialogButtonBox>
 #include <QVBoxLayout>
 
 #include <KLocalizedString>
 
-ExecutableFileOpenDialog::ExecutableFileOpenDialog(ExecutableFileOpenDialog::Mode mode, QWidget *parent) :
-    QDialog(parent)
+ExecutableFileOpenDialog::ExecutableFileOpenDialog(ExecutableFileOpenDialog::Mode mode,
+                                                   const QMimeType &mimeType, QWidget *parent)
+  : QDialog(parent)
 {
-    QLabel *label = new QLabel(i18n("What do you wish to do with this executable file?"), this);
+    QString text;
+    if (mimeType.inherits(QLatin1String("application/x-desktop"))) {
+        text = i18n("What do you wish to do with this desktop file?");
+    } else {
+        text = i18n("What do you wish to do with this executable file?");
+    }
+
+    QLabel *label = new QLabel(text, this);
 
     m_dontAskAgain = new QCheckBox(this);
     m_dontAskAgain->setText(i18n("Do not ask again"));
@@ -55,7 +64,7 @@ ExecutableFileOpenDialog::ExecutableFileOpenDialog(ExecutableFileOpenDialog::Mod
 }
 
 ExecutableFileOpenDialog::ExecutableFileOpenDialog(QWidget *parent) :
-    ExecutableFileOpenDialog(ExecutableFileOpenDialog::OpenOrExecute, parent) { }
+    ExecutableFileOpenDialog(ExecutableFileOpenDialog::OpenOrExecute, QMimeType{}, parent) { }
 
 bool ExecutableFileOpenDialog::isDontAskAgainChecked() const
 {

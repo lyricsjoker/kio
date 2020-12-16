@@ -51,7 +51,7 @@ void KIO::WidgetsOpenOrExecuteFileHandler::promptUserOpenOrExecute(KJob *job, co
     QMimeDatabase db;
     QMimeType mime = db.mimeTypeForName(mimetype);
 
-    ExecutableFileOpenDialog *dialog = new ExecutableFileOpenDialog(promptMode(mime), parentWidget);
+    ExecutableFileOpenDialog *dialog = new ExecutableFileOpenDialog(promptMode(mime), mime, parentWidget);
     dialog->setAttribute(Qt::WA_DeleteOnClose);
 
     connect(dialog, &QDialog::finished, this, [this, dialog, mime](const int result) {

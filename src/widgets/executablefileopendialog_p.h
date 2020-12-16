@@ -11,6 +11,7 @@
 #include <QDialog>
 
 class QCheckBox;
+class QMimeType;
 
 /**
  * @brief Dialog shown when opening an executable file
@@ -36,7 +37,7 @@ public:
         OpenAsExecute
     };
 
-    explicit ExecutableFileOpenDialog(Mode mode, QWidget* parent = nullptr);
+    explicit ExecutableFileOpenDialog(Mode mode, const QMimeType &mimeType, QWidget* parent = nullptr);
     explicit ExecutableFileOpenDialog(QWidget* parent = nullptr);
 
     bool isDontAskAgainChecked() const;
