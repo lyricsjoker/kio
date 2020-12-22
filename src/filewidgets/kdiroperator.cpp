@@ -34,6 +34,7 @@
 #include <QDebug>
 #include <QMimeDatabase>
 #include <QRegularExpression>
+#include <QScrollBar>
 
 #include <kfileitemdelegate.h>
 #include <KLocalizedString>
@@ -79,6 +80,8 @@ public:
 
     static bool isReadable(const QUrl &url);
     bool isSchemeSupported(const QString &scheme) const;
+
+    QPoint progressBarPos() const;
 
     KFile::FileView allViews();
 
@@ -265,6 +268,11 @@ KDirOperator::Private::~Private()
     progressDelayTimer = nullptr;
 }
 
+QPoint KDirOperator::Private::progressBarPos() const
+{
+    return QPoint(2, parent->height() - progressBar->height() - 2);
+}
+
 KDirOperator::KDirOperator(const QUrl &_url, QWidget *parent) :
     QWidget(parent),
     d(new Private(this))
@@ -308,7 +316,7 @@ KDirOperator::KDirOperator(const QUrl &_url, QWidget *parent) :
     d->progressBar = new QProgressBar(this);
     d->progressBar->setObjectName(QStringLiteral("d->progressBar"));
     d->progressBar->adjustSize();
-    d->progressBar->move(2, height() - d->progressBar->height() - 2);
+    d->progressBar->move(d->progressBarPos());
 
     d->progressDelayTimer = new QTimer(this);
     d->progressDelayTimer->setObjectName(QStringLiteral("d->progressBar delay timer"));
@@ -1293,8 +1301,6 @@ void KDirOperator::changeEvent(QEvent *event)
 
 bool KDirOperator::eventFilter(QObject *watched, QEvent *event)
 {
-    Q_UNUSED(watched);
-
     // If we are not hovering any items, check if there is a current index
     // set. In that case, we show the preview of that item.
     switch (event->type()) {
@@ -1458,6 +1464,22 @@ bool KDirOperator::eventFilter(QObject *watched, QEvent *event)
             }
         }
     }
+    break;
+    case QEvent::Resize: {
+        if (watched->objectName() == QLatin1String("d->itemview_viewport") && d->itemView->horizontalScrollBar()
+            && d->progressBar->parent() == this /* it could have been reparented to a statubar */) {
+            if (d->itemView->horizontalScrollBar()->isVisible()) {
+                // Show the progressBar above the horizontal scrollbar that may be visible
+                // in compact view
+                QPoint progressBarPos =  d->progressBarPos();
+                progressBarPos.ry() -= d->itemView->horizontalScrollBar()->height();
+                d->progressBar->move(progressBarPos);
+            } else {
+                d->progressBar->move(d->progressBarPos());
+            }
+        }
+    }
+    break;
     default:
         break;
     }
@@ -1656,6 +1678,7 @@ void KDirOperator::setView(QAbstractItemView *view)
     d->itemView->setModel(d->proxyModel);
     setFocusProxy(d->itemView);
 
+    d->itemView->viewport()->setObjectName(QStringLiteral("d->itemview_viewport"));
     view->viewport()->installEventFilter(this);
 
     KFileItemDelegate *delegate = new KFileItemDelegate(d->itemView);
@@ -2425,7 +2448,7 @@ void KDirOperator::resizeEvent(QResizeEvent *)
 
     if (d->progressBar->parent() == this) {
         // might be reparented into a statusbar
-        d->progressBar->move(2, height() - d->progressBar->height() - 2);
+        d->progressBar->move(d->progressBarPos());
     }
 }
 
